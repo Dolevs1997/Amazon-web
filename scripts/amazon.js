@@ -1,7 +1,7 @@
 
 let productsHTML = '';
 products.forEach((product) => {
-   productsHTML += `<div class="product-container">
+  productsHTML += `<div class="product-container">
     <div class="product-image-container">
       <img class="product-image"
         src="${product.image}">
@@ -53,23 +53,27 @@ products.forEach((product) => {
 });
 document.querySelector('.js-products-grid').innerHTML = productsHTML;
 
-document.querySelectorAll('.js-add-to-cart').forEach((button)=>{
-  button.addEventListener('click',()=>{
-   const productId = button.dataset.productId;
+document.querySelectorAll('.js-add-to-cart').forEach((button) => {
+  button.addEventListener('click', () => {
+    const productId = button.dataset.productId;
+
     let isItemAdded;
-    cart.forEach((item)=>{
-      if(item.productId === productId){
+    let quantity = 0;
+    cart.forEach((item) => {
+      if (item.productId === productId) {
         isItemAdded = item;
       }
     })
-    if(isItemAdded){
-      isItemAdded.quantity+=1;
-    }else{
+    if (isItemAdded) {
+      isItemAdded.quantity += 1;
+    } else {
       cart.push({
         productId: productId,
-        quantity:1
+        quantity: 1
       })
     }
-    console.log(cart);
+
+    cart.forEach((item) => { quantity += item.quantity });
+    document.querySelector('.js-cart-quantity').innerHTML = `${quantity}`;
   });
 });
