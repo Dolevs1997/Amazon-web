@@ -1,5 +1,5 @@
-import {cart} from '../data/cart.js';
-import {products} from '../data/products.js';
+import {addToCart } from '../data/cart.js';
+import { products } from '../data/products.js';
 let productsHTML = '';
 products.forEach((product) => {
   productsHTML += `<div class="product-container">
@@ -53,42 +53,12 @@ products.forEach((product) => {
   </div>`
 });
 document.querySelector('.js-products-grid').innerHTML = productsHTML;
-const timeoutProduct ={};
-document.querySelectorAll('.js-add-to-cart').forEach((button) => {
-  button.addEventListener('click', () => {
-    const {productId} = button.dataset;
-    const quantitySelector = document.querySelector(`.js-quantity-selector-${productId}`);
-    let isItemAdded;
-    const quantity = Number(quantitySelector.value);
-    let cartQuantity = 0;
-    cart.forEach((item) => {
-      if (item.productId === productId) {
-        isItemAdded = item;
-      }
-    })
-    if (isItemAdded) {
-     isItemAdded.quantity+=quantity;
-    } else {
-      cart.push({productId,quantity});
-    }
-    const addedToCart = document.querySelector(`.js-added-to-cart-${productId}`);
-  
-    
-    const previousTimeOut = timeoutProduct[productId];
-    if(previousTimeOut){
-      clearTimeout(previousTimeOut);
-    }
-    const timeoutID = setTimeout(()=>{
-      addedToCart.classList.remove('addedToCart');
-    
-    },2000)
-    timeoutProduct[productId] = timeoutID;
-    
-    addedToCart.classList.add('addedToCart');
-  
-    cart.forEach((item) => { cartQuantity += item.quantity });
-    const saveCartQuantity = document.querySelector('.js-cart-quantity');
-    saveCartQuantity.innerHTML = `${cartQuantity}`;
-  });
 
-});
+document.querySelectorAll('.js-add-to-cart').forEach(
+  (button) => {
+    button.addEventListener('click', () => {
+      const { productId } = button.dataset;
+      addToCart(productId);
+    });
+
+  });
