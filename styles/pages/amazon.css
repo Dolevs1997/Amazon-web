@@ -130,7 +130,7 @@
   flex: 1;
 }
 
-.added-to-cart {
+.addedToCart,.added-to-cart {
   color: rgb(6, 125, 98);
   font-size: 16px;
 
@@ -143,8 +143,10 @@
      opacity and make it visible. */
   opacity: 0;
 }
-
-.added-to-cart img {
+.addedToCart{
+  opacity: 1;
+}
+.addedToCart,.added-to-cart img {
   height: 20px;
   margin-right: 5px;
 }

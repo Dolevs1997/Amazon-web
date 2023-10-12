@@ -656,5 +656,37 @@ const products = [
       "apparel",
       "mens"
     ]
+  },
+  {
+    id: "id1",
+    image: "https://m.media-amazon.com/images/I/71gIfM6SsDL._AC_UL480_FMwebp_QL65_.jpg",
+    name: "Amazon Basics Classic School Backpack - Black",
+    rating: {
+      stars: 4,
+      count: 1000
+    },
+    priceCents: 1854,
+    keywords: [
+      "bags",
+      "backpack",
+      "mens"
+
+    ]
+  },
+  {
+    id: "id2",
+    image: "https://m.media-amazon.com/images/I/71+HyNwO1FL._AC_UL480_FMwebp_QL65_.jpg",
+    name: "Amazon Basics Classic School Backpack - Black','totes Women's Clear Bubble Umbrella – Transparent Dome Coverage – Large Windproof and Rainproof Canopy – Ideal for Weddings, Proms or Everyday Protection, Clear",
+    rating: {
+      stars: 4.5,
+      count: 1700
+    },
+    priceCents: 1700,
+    keywords: [
+      "bags",
+      "backpack",
+      "mens"
+
+    ]
   }
 ];
