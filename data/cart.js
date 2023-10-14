@@ -59,7 +59,14 @@ export function updateCartQuantity() {
   saveCartQuantity.innerHTML = `${calculateCartQuantity()}`;
  
 }
-
+export function updateQuantity(productId,newQuantity){
+  cart.forEach((cartItem)=>{
+    if(cartItem.productId === productId){
+      cartItem.quantity = newQuantity;
+      saveToStorage();
+    }
+  });
+}
 //delete item
 export function removeItemFromCart(productId){
   const newCart = [];
