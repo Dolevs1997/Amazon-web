@@ -1,14 +1,13 @@
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
 import { deliveryOptions } from '../data/deliveryOptions.js';
-import { calculateCartQuantity, cart, removeItemFromCart, updateQuantity } from "../data/cart.js";
+import { calculateCartQuantity, cart, removeItemFromCart, updateQuantity, updateDeliveryOption } from "../data/cart.js";
 import { products } from '../data/products.js';
 import { formatCurrency } from "./utils/money.js";
 
-
-
 let displayCartSummary = '';
 updateCartQuantity();
-//looping through the cart and checking if a product is in the cart
+
+// Looping through the cart and checking if a product is in the cart
 cart.forEach(cartItem => {
   let matchingItems;
   const productId = cartItem.productId;
@@ -18,20 +17,30 @@ cart.forEach(cartItem => {
       matchingItems = product;
     }
   });
-  const deliveryOptionId = cartItem.deliveryOptionsId;
+
+  const optionId = cartItem.deliveryOptionsId.replace(/["']/g, ''); // Remove any extra quotes
+
+  console.log(deliveryOptions);
+  console.log(cartItem)
   let delivery;
   deliveryOptions.forEach(option => {
-    if (option.id === deliveryOptionId) {
+
+    if (option.id === optionId) {
       delivery = option;
-    };
-  })
-  function dateFormat(delivery) {
+    }
+  });
+
+  function dateFormat(deliveryOption) {
     const today = dayjs();
-    const deliveryDate = today.add(delivery.deliveryDays, 'days');
+    const deliveryDate = today.add(deliveryOption.deliveryDays, 'day');
     return deliveryDate.format('dddd, MMMM DD');
   }
 
+  console.log(delivery);
+
   const formatString = dateFormat(delivery);
+
+
 
   //generating html base on cart properties
   displayCartSummary += `<div class="cart-item-container js-cart-item-container-${matchingItems.id}">
@@ -85,7 +94,8 @@ cart.forEach(cartItem => {
 
       const deliveryPrice = deliveryOption.priceCents === 0 ? 'FREE' : `$${formatCurrency(deliveryOption.priceCents)} -`;
       html += `      
-      <div class="delivery-option js-delivery-options">
+      <div class="delivery-option js-delivery-options" 
+      data-product-id="${matchingItems.id}" data-delivery-options-id="${deliveryOption.id}">
           <input type="radio" ${isChecked ? 'checked' : cartItem.deliveryOptionsId}
           class="delivery-option-input"
           name="delivery-option-${matchingItems.id}">
@@ -145,23 +155,31 @@ cart.forEach(cartItem => {
   });
 
 });
+document.querySelectorAll(`.js-delivery-options`).forEach((element) => {
+  element.addEventListener('click', () => {
+    const productId = element.dataset.productId;
+    const deliveryOptionsId = element.dataset.deliveryOptionsId;
+
+    updateDeliveryOption(productId, deliveryOptionsId);
+  })
+})
 function updateCartQuantity() {
 
   document.querySelector('.js-return-to-home-link').innerHTML = `${calculateCartQuantity()} items`;
 }
-if (cart.length == 0) {
-  const orderList = document.querySelector('.js-order-list');
-  console.log(orderList);
-  const text = document.createElement("p");
-  text.classList.add('text-empty-cart');
-  text.innerHTML = 'Your cart is empty.';
-  const linker = document.createElement("a");
-  linker.setAttribute('href', 'amazon.html');
-  const productsButton = document.createElement("button");
-  productsButton.classList.add('productButton');
-  linker.appendChild(productsButton);
-  productsButton.innerHTML = `View Products`;
-  orderList.appendChild(text);
-  orderList.appendChild(linker);
+// if (cart.length == 0) {
+//   const orderList = document.querySelector('.js-order-list');
+//   console.log(orderList);
+//   const text = document.createElement("p");
+//   text.classList.add('text-empty-cart');
+//   text.innerHTML = 'Your cart is empty.';
+//   const linker = document.createElement("a");
+//   linker.setAttribute('href', 'amazon.html');
+//   const productsButton = document.createElement("button");
+//   productsButton.classList.add('productButton');
+//   linker.appendChild(productsButton);
+//   productsButton.innerHTML = `View Products`;
+//   orderList.appendChild(text);
+//   orderList.appendChild(linker);
 
-}
+// }
