@@ -1,7 +1,7 @@
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
-import { deliveryOptions } from '../../data/deliveryOptions.js';
+import { deliveryOptions, getDeliveryOption } from '../../data/deliveryOptions.js';
 import { calculateCartQuantity, cart, removeItemFromCart, updateQuantity, updateDeliveryOption } from "../../data/cart.js";
-import { products } from '../../data/products.js';
+import { products, getProduct } from '../../data/products.js';
 import { formatCurrency } from "../utils/money.js";
 
 export function renderOrderSummary() {
@@ -11,24 +11,11 @@ export function renderOrderSummary() {
 
   // Looping through the cart and checking if a product is in the cart
   cart.forEach(cartItem => {
-    let matchingItems;
     const productId = cartItem.productId;
-
-    products.forEach((product) => {
-      if (productId === product.id) {
-        matchingItems = product;
-      }
-    });
-
+    const matchingProduct = getProduct(productId);
     const optionId = cartItem.deliveryOptionsId.replace(/["']/g, ''); // Remove any extra quotes
-
-    let delivery;
-    deliveryOptions.forEach(option => {
-
-      if (option.id === optionId) {
-        delivery = option;
-      }
-    });
+    const delivery = getDeliveryOption(optionId);
+    const formatString = dateFormat(delivery);
 
     function dateFormat(deliveryOption) {
       const today = dayjs();
@@ -36,39 +23,36 @@ export function renderOrderSummary() {
       return deliveryDate.format('dddd, MMMM DD');
     }
 
-    const formatString = dateFormat(delivery);
-
-
 
     //generating html base on cart properties
-    displayCartSummary += `<div class="cart-item-container js-cart-item-container-${matchingItems.id}">
+    displayCartSummary += `<div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
     <div class="delivery-date">
       Delivery date: ${formatString}
     </div>
   
     <div class="cart-item-details-grid">
       <img class="product-image"
-        src="${matchingItems.image}">
+        src="${matchingProduct.image}">
   
       <div class="cart-item-details">
         <div class="product-name">
-          ${matchingItems.name}
+          ${matchingProduct.name}
         </div>
         <div class="product-price">
-          $${formatCurrency(matchingItems.priceCents)}
+          $${formatCurrency(matchingProduct.priceCents)}
         </div>
         <div class="product-quantity">
           <span>
-            Quantity: <span class="quantity-label js-quantity-label-${matchingItems.id}">${cartItem.quantity}</span>
+            Quantity: <span class="quantity-label js-quantity-label-${matchingProduct.id}">${cartItem.quantity}</span>
           </span>
-          <span class="update-quantity-link link-primary js-update-link" data-product-id="${matchingItems.id}">
+          <span class="update-quantity-link link-primary js-update-link" data-product-id="${matchingProduct.id}">
             Update
           </span>
-          <input class="quantity-input js-quantity-input-${matchingItems.id}">
-        <span class="save-quantity-link link-primary js-save-link" data-product-id="${matchingItems.id}"> 
+          <input class="quantity-input js-quantity-input-${matchingProduct.id}">
+        <span class="save-quantity-link link-primary js-save-link" data-product-id="${matchingProduct.id}"> 
             Save
         </span>
-          <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${matchingItems.id}">
+          <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${matchingProduct.id}">
             Delete
           </span>
         </div>
@@ -78,13 +62,13 @@ export function renderOrderSummary() {
         <div class="delivery-options-title">
           Choose a delivery option:
           </div>
-            ${generateDeliveryOptionHTML(matchingItems, cartItem)}
+            ${generateDeliveryOptionHTML(matchingProduct, cartItem)}
         </div>
         </div>
       </div>
     </div>`
     //generating html for delivery options based on the current day (using dayjs library) 
-    function generateDeliveryOptionHTML(matchingItems, cartItem) {
+    function generateDeliveryOptionHTML(matchingProduct, cartItem) {
 
       let html = '';
       deliveryOptions.forEach((deliveryOption) => {
@@ -93,10 +77,10 @@ export function renderOrderSummary() {
         const deliveryPrice = deliveryOption.priceCents === 0 ? 'FREE' : `$${formatCurrency(deliveryOption.priceCents)} -`;
         html += `      
         <div class="delivery-option js-delivery-options" 
-        data-product-id="${matchingItems.id}" data-delivery-options-id="${deliveryOption.id}">
+        data-product-id="${matchingProduct.id}" data-delivery-options-id="${deliveryOption.id}">
             <input type="radio" ${isChecked ? 'checked' : cartItem.deliveryOptionsId}
             class="delivery-option-input"
-            name="delivery-option-${matchingItems.id}">
+            name="delivery-option-${matchingProduct.id}">
             <div>
             <div class="delivery-option-date">
               ${dateFormat(deliveryOption)}
