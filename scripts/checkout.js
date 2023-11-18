@@ -1,19 +1,42 @@
-import { calculateCartQuantity, cart, removeItemFromCart,updateQuantity } from "../data/cart.js";
+import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
+import { deliveryOptions } from '../data/deliveryOptions.js';
+import { calculateCartQuantity, cart, removeItemFromCart, updateQuantity } from "../data/cart.js";
 import { products } from '../data/products.js';
 import { formatCurrency } from "./utils/money.js";
+
+
+
 let displayCartSummary = '';
 updateCartQuantity();
+//looping through the cart and checking if a product is in the cart
 cart.forEach(cartItem => {
   let matchingItems;
   const productId = cartItem.productId;
+
   products.forEach((product) => {
     if (productId === product.id) {
       matchingItems = product;
     }
   });
+  const deliveryOptionId = cartItem.deliveryOptionsId;
+  let delivery;
+  deliveryOptions.forEach(option => {
+    if (option.id === deliveryOptionId) {
+      delivery = option;
+    };
+  })
+  function dateFormat(delivery) {
+    const today = dayjs();
+    const deliveryDate = today.add(delivery.deliveryDays, 'days');
+    return deliveryDate.format('dddd, MMMM DD');
+  }
+
+  const formatString = dateFormat(delivery);
+
+  //generating html base on cart properties
   displayCartSummary += `<div class="cart-item-container js-cart-item-container-${matchingItems.id}">
   <div class="delivery-date">
-    Delivery date: Tuesday, June 21
+    Delivery date: ${formatString}
   </div>
 
   <div class="cart-item-details-grid">
@@ -44,52 +67,41 @@ cart.forEach(cartItem => {
       </div>
     </div>
 
-    <div class="delivery-options">
+    <div class="delivery-options-container">
       <div class="delivery-options-title">
         Choose a delivery option:
-      </div>
-      <div class="delivery-option">
-        <input type="radio" checked
-          class="delivery-option-input"
-          name="delivery-option-${matchingItems.id}">
-        <div>
-          <div class="delivery-option-date">
-            Tuesday, June 21
-          </div>
-          <div class="delivery-option-price">
-            FREE Shipping
-          </div>
         </div>
+          ${generateDeliveryOptionHTML(matchingItems, cartItem)}
       </div>
-      <div class="delivery-option">
-        <input type="radio"
-          class="delivery-option-input"
-          name="delivery-option-${matchingItems.id}">
-        <div>
-          <div class="delivery-option-date">
-            Wednesday, June 15
-          </div>
-          <div class="delivery-option-price">
-            $4.99 - Shipping
-          </div>
-        </div>
-      </div>
-      <div class="delivery-option">
-        <input type="radio"
-          class="delivery-option-input"
-          name="delivery-option-${matchingItems.id}">
-        <div>
-          <div class="delivery-option-date">
-            Monday, June 13
-          </div>
-          <div class="delivery-option-price">
-            $9.99 - Shipping
-          </div>
-        </div>
       </div>
     </div>
-  </div>
-</div>`
+  </div>`
+  //generating html for delivery options based on the current day (using dayjs library) 
+  function generateDeliveryOptionHTML(matchingItems, cartItem) {
+
+    let html = '';
+    deliveryOptions.forEach((deliveryOption) => {
+      const isChecked = deliveryOption.id === cartItem.deliveryOptionsId;
+
+      const deliveryPrice = deliveryOption.priceCents === 0 ? 'FREE' : `$${formatCurrency(deliveryOption.priceCents)} -`;
+      html += `      
+      <div class="delivery-option js-delivery-options">
+          <input type="radio" ${isChecked ? 'checked' : cartItem.deliveryOptionsId}
+          class="delivery-option-input"
+          name="delivery-option-${matchingItems.id}">
+          <div>
+          <div class="delivery-option-date">
+            ${dateFormat(deliveryOption)}
+            </div>
+            <div class="delivery-option-price">
+            ${deliveryPrice} Shipping
+            </div>
+          </div>
+        </div>
+    `
+    })
+    return html;
+  }
 
   document.querySelector('.js-order-summary').innerHTML = displayCartSummary;
 
@@ -99,7 +111,7 @@ cart.forEach(cartItem => {
       const container = document.querySelector(`.js-cart-item-container-${productId}`);
       container.classList.add('is-editing-quantity');
 
-    
+
     });
   });
   document.querySelectorAll(`.js-save-link`).forEach((link) => {
@@ -108,16 +120,16 @@ cart.forEach(cartItem => {
 
       const container = document.querySelector(`.js-cart-item-container-${productId}`);
 
-       container.classList.remove('is-editing-quantity');
+      container.classList.remove('is-editing-quantity');
 
-       const quantityInput = document.querySelector(`.js-quantity-input-${productId}`);
+      const quantityInput = document.querySelector(`.js-quantity-input-${productId}`);
 
-       const newQuantity = Number(quantityInput.value);
-       if(newQuantity >= 1 && newQuantity <=10){
-         updateQuantity(productId,newQuantity);
-         document.querySelector(`.js-quantity-label-${productId}`).innerHTML = `${newQuantity}`;
-         updateCartQuantity();
-       }
+      const newQuantity = Number(quantityInput.value);
+      if (newQuantity >= 1 && newQuantity <= 10) {
+        updateQuantity(productId, newQuantity);
+        document.querySelector(`.js-quantity-label-${productId}`).innerHTML = `${newQuantity}`;
+        updateCartQuantity();
+      }
     });
   })
 
@@ -136,4 +148,20 @@ cart.forEach(cartItem => {
 function updateCartQuantity() {
 
   document.querySelector('.js-return-to-home-link').innerHTML = `${calculateCartQuantity()} items`;
+}
+if (cart.length == 0) {
+  const orderList = document.querySelector('.js-order-list');
+  console.log(orderList);
+  const text = document.createElement("p");
+  text.classList.add('text-empty-cart');
+  text.innerHTML = 'Your cart is empty.';
+  const linker = document.createElement("a");
+  linker.setAttribute('href', 'amazon.html');
+  const productsButton = document.createElement("button");
+  productsButton.classList.add('productButton');
+  linker.appendChild(productsButton);
+  productsButton.innerHTML = `View Products`;
+  orderList.appendChild(text);
+  orderList.appendChild(linker);
+
 }
