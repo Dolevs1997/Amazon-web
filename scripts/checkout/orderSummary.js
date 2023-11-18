@@ -3,6 +3,7 @@ import { deliveryOptions, getDeliveryOption } from '../../data/deliveryOptions.j
 import { calculateCartQuantity, cart, removeItemFromCart, updateQuantity, updateDeliveryOption } from "../../data/cart.js";
 import { products, getProduct } from '../../data/products.js';
 import { formatCurrency } from "../utils/money.js";
+import { renderPaymentSummary } from './paymentSummary.js';
 
 export function renderOrderSummary() {
 
@@ -122,6 +123,7 @@ export function renderOrderSummary() {
           document.querySelector(`.js-quantity-label-${productId}`).innerHTML = `${newQuantity}`;
           updateCartQuantity();
         }
+        renderPaymentSummary();
       });
     })
 
@@ -133,6 +135,7 @@ export function renderOrderSummary() {
         const itemToRemove = document.querySelector(`.js-cart-item-container-${productId}`);
         itemToRemove.remove();
         updateCartQuantity();
+        renderPaymentSummary();
       });
     });
 
@@ -144,26 +147,28 @@ export function renderOrderSummary() {
 
       updateDeliveryOption(productId, deliveryOptionsId);
       renderOrderSummary();
+      renderPaymentSummary();
     })
   })
   function updateCartQuantity() {
 
     document.querySelector('.js-return-to-home-link').innerHTML = `${calculateCartQuantity()} items`;
   }
-  // if (cart.length == 0) {
-  //   const orderList = document.querySelector('.js-order-list');
-  //   console.log(orderList);
-  //   const text = document.createElement("p");
-  //   text.classList.add('text-empty-cart');
-  //   text.innerHTML = 'Your cart is empty.';
-  //   const linker = document.createElement("a");
-  //   linker.setAttribute('href', 'amazon.html');
-  //   const productsButton = document.createElement("button");
-  //   productsButton.classList.add('productButton');
-  //   linker.appendChild(productsButton);
-  //   productsButton.innerHTML = `View Products`;
-  //   orderList.appendChild(text);
-  //   orderList.appendChild(linker);
+  if (cart.length == 0) {
+    const orderList = document.querySelector('.js-order-list');
+    console.log(orderList);
+    const text = document.createElement("p");
+    text.classList.add('text-empty-cart');
+    text.innerHTML = 'Your cart is empty.';
+    const linker = document.createElement("a");
+    linker.setAttribute('href', 'amazon.html');
+    const productsButton = document.createElement("button");
+    productsButton.classList.add('productButton');
+    linker.appendChild(productsButton);
+    productsButton.innerHTML = `View Products`;
+    orderList.appendChild(text);
+    orderList.appendChild(linker);
 
-  // }
+  }
+
 }
